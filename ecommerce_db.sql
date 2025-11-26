@@ -52,6 +52,20 @@ CREATE TABLE Productos (
   Origen varchar(100) DEFAULT NULL
 );
 
+INSERT INTO Productos (ID_Producto, Nombre, Descripcion, Precio, Cantidad_Almacen, Fabricante, Origen) VALUES
+(1, 'Almohada de Memoria Viscoelástica Premium', 'Almohada ergonómica con espuma de memoria que se adapta perfectamente a la forma de tu cabeza y cuello. Diseñada para reducir puntos de presión y mantener una alineación óptima de la columna durante el sueño. Incluye funda lavable de bambú transpirable.', 899.99, 45, 'DreamComfort', 'México'),
+(2, 'Máscara de Dormir con Sonido Blanco', 'Máscara de ojos premium con auriculares bluetooth integrados. Reproduce sonidos relajantes, meditaciones guiadas y música para dormir. Batería de 12 horas. Material ultrasuave que bloquea 100% de la luz.', 1299.99, 30, 'SleepTech', 'Estados Unidos'),
+(3, 'Difusor de Aromas Nocturno Inteligente', 'Difusor ultrasónico con control por app y 7 colores de luz LED ajustables. Programable para activarse automáticamente antes de dormir. Incluye aceites esenciales de lavanda, eucalipto y manzanilla. Capacidad de 300ml.', 749.99, 60, 'AromaLife', 'China'),
+(4, 'Cobija Ponderada Terapéutica 7kg', 'Manta con peso distribuido uniformemente que proporciona una sensación de abrazo relajante. Relleno de microperlas de vidrio hipoalergénicas. Funda exterior de algodón orgánico removible y lavable. Ideal para reducir ansiedad y mejorar calidad del sueño.', 1899.99, 25, 'RestWell', 'Canadá'),
+(5, 'Humidificador Ultra Silencioso', 'Humidificador de niebla fría con tecnología ultrasónica silenciosa (menos de 25dB). Tanque de 4 litros con autonomía de 24 horas. Apagado automático y luz nocturna ajustable. Perfecto para mantener humedad óptima durante la noche.', 599.99, 50, 'PureAir', 'Corea del Sur'),
+(6, 'Set de Sábanas de Bambú King Size', 'Juego completo de sábanas 100% fibra de bambú orgánico. Extremadamente suaves, termoreguladoras e hipoalergénicas. Incluye sábana ajustable, sábana plana y 2 fundas de almohada. Tejido de 400 hilos que mejora con cada lavado.', 1499.99, 35, 'EcoSleep', 'India'),
+(7, 'Luz Nocturna con Simulador de Amanecer', 'Despertador con luz progresiva que simula el amanecer natural. 20 niveles de intensidad y 7 sonidos naturales. Función de radio FM. Ayuda a despertar de forma natural y mejora el estado de ánimo matutino.', 899.99, 40, 'SunRise', 'Alemania'),
+(8, 'Té Nocturno Relajante Orgánico (30 sobres)', 'Mezcla premium de hierbas orgánicas: valeriana, pasiflora, tila y melisa. Sin cafeína. Certificado orgánico y comercio justo. Cada sobre está individualmente envuelto para preservar frescura y aroma. Promueve relajación natural.', 299.99, 100, 'HerbalNight', 'México'),
+(9, 'Cortinas Blackout Térmicas', 'Cortinas opacas que bloquean 99% de la luz y reducen ruido exterior. Aislamiento térmico que mantiene temperatura ideal. Fácil instalación con argollas incluidas. Disponible en color gris oscuro, tamaño 2.4m x 2.1m por panel (set de 2).', 1199.99, 28, 'WindowPro', 'España'),
+(10, 'Monitor de Sueño Inteligente', 'Dispositivo no invasivo que se coloca bajo el colchón y monitorea ciclos de sueño, frecuencia cardíaca y respiratoria. App móvil con análisis detallado y consejos personalizados. Compatible con iOS y Android. No requiere uso de wearables.', 2499.99, 15, 'SleepSense', 'Estados Unidos'),
+(11, 'Almohada Corporal para Embarazadas', 'Almohada en forma de U de 1.70m diseñada para brindar soporte completo durante el embarazo y lactancia. Relleno ajustable de fibra hipoalergénica. Funda de algodón orgánico lavable. También ideal para personas con problemas de espalda.', 1099.99, 20, 'MamaCare', 'Brasil'),
+(12, 'Aceite de CBD para Dormir 30ml', 'Aceite de cannabidiol de espectro completo 1000mg con melatonina. Ayuda a conciliar el sueño de forma natural sin crear dependencia. Sabor natural de menta. Certificado por laboratorio. Incluye gotero de precisión. Sin THC.', 1799.99, 18, 'NaturalCalm', 'Canadá');
+
 -- --------------------------------------------------------
 
 --
@@ -169,7 +183,7 @@ ALTER TABLE Ordenes_Detalles
 -- AUTO_INCREMENT for table Productos
 --
 ALTER TABLE Productos
-  MODIFY ID_Producto int NOT NULL AUTO_INCREMENT;
+  MODIFY ID_Producto int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table Roles

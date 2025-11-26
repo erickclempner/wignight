@@ -47,6 +47,17 @@ $currentUser = getCurrentUser();
                             <i class="fas fa-bed"></i> Productos
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="carrito.php">
+                            <i class="fas fa-shopping-cart"></i> Carrito
+                            <?php 
+                            $cart_count = getCartCount();
+                            if ($cart_count > 0): 
+                            ?>
+                                <span class="badge bg-danger cart-badge"><?php echo $cart_count; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
                     <?php if (isLoggedIn()): ?>
                         <?php if (isAdmin()): ?>
                             <li class="nav-item">
@@ -56,8 +67,8 @@ $currentUser = getCurrentUser();
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <i class="fas fa-user"></i> <?php echo htmlspecialchars($currentUser['Nombre_Usuario']); ?>
+                            <a class="nav-link" href="perfil.php">
+                                <i class="fas fa-user"></i> Mi Perfil
                             </a>
                         </li>
                         <li class="nav-item">
@@ -68,12 +79,7 @@ $currentUser = getCurrentUser();
                     <?php else: ?>
                         <li class="nav-item">
                             <a class="nav-link" href="login.php">
-                                <i class="fas fa-sign-in-alt"></i> Ingresar
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="register.php">
-                                <i class="fas fa-user-plus"></i> Registrarse
+                                <i class="fas fa-user-circle"></i> Mi Cuenta
                             </a>
                         </li>
                     <?php endif; ?>
@@ -162,9 +168,18 @@ $currentUser = getCurrentUser();
                                             <?php echo $product['Cantidad_Almacen']; ?> en stock
                                         </span>
                                     </div>
-                                    <a href="productos.php" class="btn btn-primary mt-3 w-100">
-                                        <i class="fas fa-eye"></i> Ver Detalles
-                                    </a>
+                                    
+                                    <?php if ($product['Cantidad_Almacen'] > 0): ?>
+                                        <button id="btn-<?php echo $product['ID_Producto']; ?>" 
+                                                class="btn btn-primary mt-3 w-100" 
+                                                onclick="addToCart(<?php echo $product['ID_Producto']; ?>, '<?php echo htmlspecialchars($product['Nombre']); ?>')">
+                                            <i class="fas fa-shopping-cart"></i> Agregar al Carrito
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="btn btn-secondary mt-3 w-100" disabled>
+                                            <i class="fas fa-ban"></i> Sin Stock
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -261,6 +276,75 @@ $currentUser = getCurrentUser();
         </div>
     </footer>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        function addToCart(idProducto, nombreProducto) {
+            const btn = document.getElementById('btn-' + idProducto);
+            const originalHtml = btn.innerHTML;
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
+
+            const formData = new FormData();
+            formData.append('action', 'add');
+            formData.append('id_producto', idProducto);
+            formData.append('cantidad', 1);
+
+            fetch('api/carrito.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success feedback
+                    btn.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-success');
+                    
+                    // Update cart badge
+                    updateCartBadge(data.data.cart_count);
+                    
+                    // Reload cart preview
+                    reloadCartPreview();
+                    
+                    // Show enhanced notification
+                    showNotification('success', 'Producto agregado correctamente', {
+                        nombre: nombreProducto,
+                        precio: data.data.precio || 0,
+                        foto: data.data.foto || null
+                    });
+                    
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-primary');
+                        btn.disabled = false;
+                    }, 2000);
+                } else {
+                    alert(data.message);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar al carrito');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        }
+
+        // Functions updateCartBadge, showNotification, etc. are in cart.js
+    </script>
+
+    <!-- Cart Preview Component - Must be direct child of body for fixed positioning -->
+    <?php include 'components/cart_preview.php'; ?>
 </body>
 </html>

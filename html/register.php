@@ -36,8 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sssss", $nombre, $email, $hashed_password, $fecha_nacimiento, $direccion);
             
             if ($stmt->execute()) {
+                // Get the new user ID
+                $new_user_id = $conn->insert_id;
+                
+                // Auto-login the user
+                $_SESSION['user_id'] = $new_user_id;
+                $_SESSION['user_name'] = $nombre;
+                $_SESSION['user_email'] = $email;
+                $_SESSION['id_rol'] = 1; // Cliente
+                
+                // Merge guest cart if exists
+                mergeGuestCartToUser($new_user_id);
+                
                 $_SESSION['register_success'] = 'Cuenta creada exitosamente. ¡Bienvenido a WigNight!';
-                header("Location: login.php");
+                header("Location: perfil.php");
                 exit();
             } else {
                 $error = 'Error al crear la cuenta. Intenta nuevamente.';
@@ -82,13 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="login.php">
-                            <i class="fas fa-sign-in-alt"></i> Ingresar
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="register.php">
-                            <i class="fas fa-user-plus"></i> Registrarse
+                        <a class="nav-link active" href="login.php">
+                            <i class="fas fa-user-circle"></i> Mi Cuenta
                         </a>
                     </li>
                 </ul>

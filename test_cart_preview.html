@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cart Preview Test</title>
+    <link rel="stylesheet" href="html/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        .test-button {
+            padding: 15px 30px;
+            background: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .test-button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cart Preview Component Test</h1>
+    <p>Hover over the button below to test the cart preview:</p>
+    <button class="test-button" id="testButton">
+        <i class="fas fa-shopping-cart"></i> Hover Here for Cart Preview
+    </button>
+
+    <!-- Cart Preview Component -->
+    <div class="cart-preview-overlay active" id="cartPreviewOverlay" style="display: block;">
+        <div class="cart-preview-container">
+            <div class="cart-preview-header">
+                <h6>Cantidad: <span id="cartPreviewCount">2</span></h6>
+            </div>
+            
+            <div class="cart-preview-body" id="cartPreviewBody">
+                <div class="cart-preview-item">
+                    <div class="cart-preview-img-placeholder"><i class="fas fa-bed"></i></div>
+                    <div class="cart-preview-details">
+                        <div class="cart-preview-name">Test Product</div>
+                        <div class="cart-preview-meta">Color: BLANCO CON OTRO</div>
+                        <div class="cart-preview-quantity">Cantidad: 1</div>
+                        <div class="cart-preview-price">$1799.99</div>
+                    </div>
+                    <button class="cart-preview-remove" title="Eliminar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cart-preview-footer" style="display:block;">
+                <div class="cart-preview-total-section">
+                    <div class="cart-preview-total">
+                        <span>Total:</span>
+                        <span class="cart-preview-total-amount">$2899.98</span>
+                    </div>
+                </div>
+                
+                <div class="cart-preview-actions">
+                    <a href="#" class="cart-preview-btn cart-preview-btn-primary">
+                        <i class="fas fa-shopping-bag"></i> <span>Ver Bolsa (2)</span>
+                    </a>
+                    <a href="#" class="cart-preview-btn cart-preview-btn-secondary">
+                        <i class="fas fa-lock"></i> Iniciar Compra Segura
+                    </a>
+                </div>
+                
+                <div class="cart-preview-payment-icons">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Crect fill='%23f90' width='48' height='32' rx='4'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-weight='bold' font-size='10'%3ECard%3C/text%3E%3C/svg%3E" alt="Credit Card">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Crect fill='%230070ba' width='48' height='32' rx='4'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-weight='bold' font-size='8'%3EPayPal%3C/text%3E%3C/svg%3E" alt="PayPal">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 32'%3E%3Crect fill='%2300a3e0' width='48' height='32' rx='4'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' font-family='Arial' font-weight='bold' font-size='8'%3EMaestro%3C/text%3E%3C/svg%3E" alt="Maestro">
+                </div>
+                
+                <div class="cart-preview-security-badges">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'%3E%3Crect fill='white' width='60' height='40' rx='4' stroke='%23ccc'/%3E%3Cpath d='M20,15 L20,25 M40,15 L40,25' stroke='%23333' stroke-width='2'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23333' font-family='Arial' font-size='8'%3ESecure%3C/text%3E%3C/svg%3E" alt="Secure">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'%3E%3Crect fill='white' width='60' height='40' rx='4' stroke='%23ccc'/%3E%3Ccircle cx='30' cy='20' r='8' fill='none' stroke='%23e63946' stroke-width='2'/%3E%3Cpath d='M27,20 L29,22 L33,18' stroke='%23e63946' stroke-width='2' fill='none'/%3E%3Ctext x='50%25' y='85%25' text-anchor='middle' fill='%23333' font-family='Arial' font-size='6'%3ECertified%3C/text%3E%3C/svg%3E" alt="Certified">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="html/js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('cartPreviewOverlay');
+            const button = document.getElementById('testButton');
+            
+            // Remove active class initially
+            overlay.classList.remove('active');
+            
+            // Test hover
+            button.addEventListener('mouseenter', function() {
+                overlay.classList.add('active');
+            });
+            
+            overlay.addEventListener('mouseleave', function() {
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>

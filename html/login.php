@@ -25,11 +25,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['nombre_usuario'] = $user['Nombre_Usuario'];
                 $_SESSION['id_rol'] = $user['id_rol'];
                 
+                // Merge guest cart to user account
+                mergeGuestCartToUser($user['ID_Usuario']);
+                
                 // Redirect based on role
                 if ($user['id_rol'] == 2) {
                     header("Location: admin.php");
                 } else {
-                    header("Location: index.php");
+                    header("Location: perfil.php");
                 }
                 exit();
             } else {
@@ -78,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="login.php">
-                            <i class="fas fa-sign-in-alt"></i> Ingresar
+                            <i class="fas fa-user-circle"></i> Mi Cuenta
                         </a>
                     </li>
                 </ul>

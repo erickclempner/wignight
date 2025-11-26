@@ -83,6 +83,17 @@ $currentUser = getCurrentUser();
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="carrito.php">
+                            <i class="fas fa-shopping-cart"></i> Carrito
+                            <?php 
+                            $cartCount = getCartCount();
+                            if ($cartCount > 0):
+                            ?>
+                                <span class="badge bg-danger cart-badge"><?php echo $cartCount; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link active" href="admin.php">
                             <i class="fas fa-cog"></i> Admin
                         </a>
@@ -424,7 +435,11 @@ $currentUser = getCurrentUser();
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/cart.js"></script>
     <script>
         function editProduct(product) {
             document.getElementById('edit_id_producto').value = product.ID_Producto;
@@ -447,5 +462,8 @@ $currentUser = getCurrentUser();
             deleteModal.show();
         }
     </script>
+
+    <!-- Cart Preview Component - Must be direct child of body for fixed positioning -->
+    <?php include 'components/cart_preview.php'; ?>
 </body>
 </html>
