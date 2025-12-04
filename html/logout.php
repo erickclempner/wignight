@@ -1,7 +1,7 @@
 <?php
 require_once 'config/database.php';
 
-// Logout user
+// logout del usuario
 unset($_SESSION['user_id']);
 unset($_SESSION['nombre_usuario']);
 unset($_SESSION['id_rol']);

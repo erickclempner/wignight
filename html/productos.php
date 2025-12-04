@@ -1,7 +1,7 @@
 <?php
 require_once 'config/database.php';
 
-// Get all products from database
+// obtengo todos los productos de la base de datos
 $conn = getConnection();
 $query = "SELECT * FROM Productos ORDER BY ID_Producto DESC";
 $result = $conn->query($query);
@@ -26,7 +26,6 @@ $currentUser = getCurrentUser();
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="index.php">
@@ -88,7 +87,6 @@ $currentUser = getCurrentUser();
         </div>
     </nav>
 
-    <!-- Page Header -->
     <section class="py-5" style="background: linear-gradient(135deg, rgba(61, 39, 35, 0.5), rgba(22, 33, 62, 0.5)); min-height: 30vh; display: flex; align-items: center;">
         <div class="container text-center">
             <h1 class="hero-title mb-3">
@@ -100,7 +98,6 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Products Section -->
     <section class="py-5">
         <div class="container">
             <?php if (empty($productos)): ?>
@@ -194,7 +191,7 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Info Banner -->
+    <!-- banner -->
     <section class="py-5" style="background: rgba(61, 39, 35, 0.3);">
         <div class="container">
             <div class="row text-center">
@@ -222,7 +219,6 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="text-center">
         <div class="container">
             <div class="row">
@@ -262,7 +258,6 @@ $currentUser = getCurrentUser();
         </div>
     </footer>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -272,7 +267,7 @@ $currentUser = getCurrentUser();
             const btn = document.getElementById('btn-' + idProducto);
             const originalHtml = btn.innerHTML;
             
-            // Disable button and show loading
+            // deshabilitar el botón mientras carga
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
 
@@ -288,25 +283,25 @@ $currentUser = getCurrentUser();
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Show success feedback
-                    btn.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+                    // mensaje de exito
+                    btn.innerHTML = '<i class="fas fa-check"></i> Agregado';
                     btn.classList.remove('btn-primary');
                     btn.classList.add('btn-success');
                     
-                    // Update cart badge
+                    // actualizar el badge
                     updateCartBadge(data.data.cart_count);
                     
-                    // Reload cart preview
+                    // volver a cargar el preview del carrito
                     reloadCartPreview();
                     
-                    // Show enhanced notification with product details
+                    // pop up de notificación de éxito
                     showNotification('success', 'Producto agregado correctamente', {
                         nombre: nombreProducto,
                         precio: data.data.precio || 0,
                         foto: data.data.foto || null
                     });
                     
-                    // Reset button after 2 seconds
+                    // resetear el botón
                     setTimeout(() => {
                         btn.innerHTML = originalHtml;
                         btn.classList.remove('btn-success');
@@ -326,11 +321,8 @@ $currentUser = getCurrentUser();
                 btn.disabled = false;
             });
         }
-
-        // Functions updateCartBadge, showNotification, reloadCartPreview, etc. are in cart.js
     </script>
 
-    <!-- Cart Preview Component - Must be direct child of body for fixed positioning -->
     <?php include 'components/cart_preview.php'; ?>
 </body>
 </html>

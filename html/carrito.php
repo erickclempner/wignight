@@ -1,7 +1,7 @@
 <?php
 require_once 'config/database.php';
 
-// Allow both logged in and guest users
+// se permiten invitados tambien
 $currentUser = isLoggedIn() ? getCurrentUser() : null;
 ?>
 <!DOCTYPE html>
@@ -15,7 +15,6 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="index.php">
@@ -72,7 +71,6 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
         </div>
     </nav>
 
-    <!-- Cart Header -->
     <section class="py-4" style="background: linear-gradient(135deg, rgba(44, 24, 16, 0.5), rgba(45, 36, 22, 0.5)); min-height: 20vh; display: flex; align-items: center;">
         <div class="container">
             <h1 class="hero-title" style="font-size: 2.5rem;">
@@ -84,7 +82,6 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
         </div>
     </section>
 
-    <!-- Cart Content -->
     <section class="py-5">
         <div class="container">
             <div id="loading" class="text-center py-5">
@@ -98,7 +95,7 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
                 <i class="fas fa-shopping-cart fa-5x mb-4" style="color: var(--wood-lighter);"></i>
                 <h3 style="color: var(--moon-glow);">Tu carrito está vacío</h3>
                 <p style="color: var(--accent-cream); font-size: 1.1rem;">
-                    Agrega productos para comenzar tu viaje hacia el mejor descanso
+                    Agrega productos para empezar tu viaje hacia el mejor descanso con WigNight
                 </p>
                 <a href="productos.php" class="btn btn-primary btn-lg mt-3">
                     <i class="fas fa-bed"></i> Ver Productos
@@ -118,7 +115,7 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
                         </div>
 
                         <div id="cart-items">
-                            <!-- Cart items will be inserted here -->
+                            <!-- Los artículos del carrito se suben dinámicamente -->
                         </div>
                     </div>
 
@@ -148,13 +145,6 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
                                 <a href="productos.php" class="btn btn-secondary w-100">
                                     <i class="fas fa-arrow-left"></i> Seguir Comprando
                                 </a>
-
-                                <div class="mt-4 p-3" style="background: rgba(107, 68, 35, 0.3); border-radius: 10px; border: 1px solid var(--wood-accent);">
-                                    <small style="color: var(--accent-cream);">
-                                        <i class="fas fa-info-circle"></i> 
-                                        <strong>Nota:</strong> Los productos se reservarán hasta completar la compra. El inventario se actualizará automáticamente.
-                                    </small>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -163,7 +153,6 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
         </div>
     </section>
 
-    <!-- Success Modal -->
     <div class="modal fade" id="successModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -197,7 +186,6 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="text-center">
         <div class="container">
             <p class="mb-0">
@@ -210,7 +198,7 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
     <script>
         let cartData = null;
 
-        // Load cart on page load
+        // cargar carrito
         document.addEventListener('DOMContentLoaded', function() {
             loadCart();
         });
@@ -429,14 +417,14 @@ $currentUser = isLoggedIn() ? getCurrentUser() : null;
                     
                     updateCartBadge(0);
                 } else {
-                    // Check if user needs to login
+                    // Checar si el usuario tiene que volverse a loguear
                     if (data.data && data.data.redirect) {
                         if (confirm(data.message + '. ¿Deseas iniciar sesión ahora?')) {
                             window.location.href = data.data.redirect;
                         }
                     } else {
                         alert(data.message);
-                        loadCart(); // Reload to show updated stock
+                        loadCart(); // volver a cargar para mostrar que se hizo la compra
                     }
                 }
             })

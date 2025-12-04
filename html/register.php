@@ -3,7 +3,7 @@ require_once 'config/database.php';
 
 $error = '';
 
-// Handle registration
+// manejar registro
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = trim($_POST['nombre']);
     $email = trim($_POST['email']);
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $conn = getConnection();
         
-        // Check if email already exists
+        // checar que el mail no exista
         $stmt = $conn->prepare("SELECT ID_Usuario FROM Usuarios WHERE Correo_Electronico = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -36,16 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("sssss", $nombre, $email, $hashed_password, $fecha_nacimiento, $direccion);
             
             if ($stmt->execute()) {
-                // Get the new user ID
                 $new_user_id = $conn->insert_id;
                 
-                // Auto-login the user
+                // login automático
                 $_SESSION['user_id'] = $new_user_id;
                 $_SESSION['user_name'] = $nombre;
                 $_SESSION['user_email'] = $email;
                 $_SESSION['id_rol'] = 1; // Cliente
                 
-                // Merge guest cart if exists
+                // hacer el merge con el carrito de invitado, si es que se agregaron productos antes de iniciar sesión
                 mergeGuestCartToUser($new_user_id);
                 
                 $_SESSION['register_success'] = 'Cuenta creada exitosamente. ¡Bienvenido a WigNight!';
@@ -72,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="index.php">
@@ -103,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </nav>
 
-    <!-- Register Section -->
     <section class="py-5">
         <div class="container">
             <div class="auth-container">
@@ -203,7 +200,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="text-center">
         <div class="container">
             <p class="mb-0">

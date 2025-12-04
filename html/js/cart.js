@@ -1,11 +1,12 @@
 // Funcionalidad del carrito
+// aqui van funciones que me ayudaron mucho a manejar el carrito sin repetir tanto código
 
 function formatPrice(price) {
     return '$' + parseFloat(price).toFixed(2);
 }
 
 function updateCartBadge(count) {
-    // Actualizar todas las badges del carrito en el navbar
+    // actualizar todas las badges del carrito en el navbar
     const badges = document.querySelectorAll('.navbar .cart-badge');
     badges.forEach(badge => {
         badge.textContent = count;
@@ -65,7 +66,7 @@ let isOverCart = false;
 let isOverPreview = false;
 
 function initCartPreview() {
-    // Encontrar links del carrito
+    // encontrar links del carrito
     const cartLinks = document.querySelectorAll('a[href="carrito.php"], a.nav-link[href*="carrito"]');
     const previewOverlay = document.getElementById('cartPreviewOverlay');
     
@@ -85,14 +86,14 @@ function initCartPreview() {
     }
     
     cartLinks.forEach((cartLink, index) => {
-        // Mostrar vista previa al pasar el mouse sobre el link del carrito
+        // mostrar vista previa al pasar el mouse sobre el link del carrito
         cartLink.addEventListener('mouseenter', function(e) {
             isOverCart = true;
             clearTimeout(hidePreviewTimeout);
             showCartPreview();
         });
         
-        // Ocultar vista previa al salir del link del carrito (con un delay)
+        // ocultar la vista previa
         cartLink.addEventListener('mouseleave', function(e) {
             isOverCart = false;
             hidePreviewTimeout = setTimeout(() => {
@@ -103,7 +104,7 @@ function initCartPreview() {
         });
     });
     
-    // Mantener la vista previa visible al tener el mouse adentro
+    // mantener la vista previa visible al tener el mouse adentro
     const previewContainer = previewOverlay.querySelector('.cart-preview-container');
     if (previewContainer) {
         previewContainer.addEventListener('mouseenter', function() {
@@ -111,7 +112,7 @@ function initCartPreview() {
             clearTimeout(hidePreviewTimeout);
         });
         
-        // Quitar la vista previa
+        // quitar la vista previa
         previewContainer.addEventListener('mouseleave', function() {
             isOverPreview = false;
             hidePreviewTimeout = setTimeout(() => {
@@ -122,7 +123,7 @@ function initCartPreview() {
         });
     }
     
-    // Quitar el preview cuando hacer click en el fondo del overlay (no en el contenedor)
+    // quitar el preview cuando se haga click en el fondo del overlay
     previewOverlay.addEventListener('click', function(e) {
         if (e.target === previewOverlay) {
             hideCartPreview();
@@ -143,7 +144,7 @@ function showCartPreview() {
         console.error('Overlay del preview no encontrado en showCartPreview');
     }
 }
-// Ocultar el preview del carrito
+// ocultar el preview
 function hideCartPreview() {
     const previewOverlay = document.getElementById('cartPreviewOverlay');
     if (previewOverlay) {
@@ -243,7 +244,7 @@ function renderCartPreview(cartData) {
         verBolsaText.textContent = `Ver Bolsa (${cartData.count})`;
     }
     
-    // Mostrar footer
+    // footer
     if (footer) {
         footer.style.display = 'block';
     }
@@ -284,7 +285,7 @@ function removeFromCartPreview(idCarrito) {
     });
 }
 
-// Recargar preview del carrito después de agregar un artículo
+// volver a cargar el preview del carrito después de agregar un artículo
 function reloadCartPreview() {
     cartPreviewLoaded = false;
     loadCartPreview();

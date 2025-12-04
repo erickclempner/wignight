@@ -1,4 +1,4 @@
-<!-- Cart Preview Dropdown Component -->
+<!-- componente del preview del carrito cuando pones el mouse arriba del logo en el header -->
 <div class="cart-preview-overlay" id="cartPreviewOverlay">
     <div class="cart-preview-container">
         <div class="cart-preview-header">

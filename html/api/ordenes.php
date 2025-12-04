@@ -1,7 +1,7 @@
 <?php
 require_once '../config/database.php';
 
-// Require admin access for most operations
+// requiere acceso de admin
 header('Content-Type: application/json');
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
@@ -19,7 +19,7 @@ switch ($action) {
 }
 
 function getOrderDetails() {
-    // Require admin access
+    // requiere acceso de admin
     if (!isAdmin()) {
         echo json_encode(['success' => false, 'error' => 'Acceso denegado']);
         exit();
@@ -34,7 +34,7 @@ function getOrderDetails() {
     
     $conn = getConnection();
     
-    // Get order info
+    // info de la orden
     $stmt = $conn->prepare("SELECT o.*, u.Nombre_Usuario, u.Correo_Electronico 
                             FROM Ordenes o 
                             JOIN Usuarios u ON o.ID_Usuario_FK = u.ID_Usuario 
@@ -50,7 +50,7 @@ function getOrderDetails() {
         exit();
     }
     
-    // Get order details
+    // detalles de la orden para el historial
     $stmt = $conn->prepare("SELECT od.*, p.Nombre as Nombre_Producto 
                             FROM Ordenes_Detalles od 
                             JOIN Productos p ON od.ID_Producto_FK = p.ID_Producto 
@@ -73,7 +73,6 @@ function getOrderDetails() {
 }
 
 function getOrdersList() {
-    // Require admin access
     if (!isAdmin()) {
         echo json_encode(['success' => false, 'error' => 'Acceso denegado']);
         exit();
@@ -99,7 +98,7 @@ function getOrdersList() {
         $ordenes[] = $row;
     }
     
-    // Get total count
+    // total
     $countResult = $conn->query("SELECT COUNT(*) as total FROM Ordenes");
     $total = $countResult->fetch_assoc()['total'];
     

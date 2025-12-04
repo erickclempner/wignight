@@ -89,7 +89,7 @@ $currentUser = getCurrentUser();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Admin page specific overrides */
+        /*overrides especificos para la pagina de admin*/
         .table-responsive {
             background: rgba(44, 24, 16, 0.9);
             border-radius: 15px;
@@ -185,7 +185,6 @@ $currentUser = getCurrentUser();
         </div>
     </nav>
 
-    <!-- Admin Header -->
     <section class="py-4">
         <div class="container-fluid">
             <div class="admin-header">
@@ -197,7 +196,7 @@ $currentUser = getCurrentUser();
                 </p>
             </div>
 
-            <!-- Statistics -->
+            <!-- Estadísticas -->
             <div class="admin-stats">
                 <div class="stat-card">
                     <div class="stat-number"><?php echo $stats['total_productos']; ?></div>
@@ -239,7 +238,6 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Products Management -->
     <section class="py-4">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -319,12 +317,17 @@ $currentUser = getCurrentUser();
                                     <td><?php echo htmlspecialchars($producto['Fabricante'] ?? '-'); ?></td>
                                     <td><?php echo htmlspecialchars($producto['Origen'] ?? '-'); ?></td>
                                     <td>
+                                        <?php 
+                                        // Exclude Fotos from JSON to avoid encoding issues with binary data
+                                        $productoForJs = $producto;
+                                        unset($productoForJs['Fotos']);
+                                        ?>
                                         <button class="btn btn-sm btn-secondary me-1" 
-                                                onclick="editProduct(<?php echo htmlspecialchars(json_encode($producto)); ?>)">
+                                                onclick="editProduct(<?php echo htmlspecialchars(json_encode($productoForJs), ENT_QUOTES, 'UTF-8'); ?>)">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button class="btn btn-sm btn-danger" 
-                                                onclick="confirmDelete(<?php echo $producto['ID_Producto']; ?>, '<?php echo htmlspecialchars($producto['Nombre']); ?>')">
+                                                onclick="confirmDelete(<?php echo $producto['ID_Producto']; ?>, '<?php echo htmlspecialchars($producto['Nombre'], ENT_QUOTES, 'UTF-8'); ?>')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
@@ -337,7 +340,7 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Orders History Section -->
+    <!-- Historial de Compras -->
     <section class="py-4">
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -422,7 +425,7 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Order Details Modal -->
+    <!-- Modal de detalles de la orden -->
     <div class="modal fade" id="orderDetailsModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" style="background: linear-gradient(135deg, rgba(61, 39, 35, 0.98), rgba(22, 33, 62, 0.98)); border: 2px solid var(--accent-gold);">
@@ -449,7 +452,7 @@ $currentUser = getCurrentUser();
         </div>
     </div>
 
-    <!-- Add Product Modal -->
+    <!-- Modal para Agregar Producto -->
     <div class="modal fade" id="addProductModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" style="background: linear-gradient(135deg, rgba(61, 39, 35, 0.98), rgba(22, 33, 62, 0.98)); border: 2px solid var(--accent-gold);">
@@ -523,7 +526,7 @@ $currentUser = getCurrentUser();
         </div>
     </div>
 
-    <!-- Edit Product Modal -->
+    <!-- Modal para Editar Producto -->
     <div class="modal fade" id="editProductModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" style="background: linear-gradient(135deg, rgba(61, 39, 35, 0.98), rgba(22, 33, 62, 0.98)); border: 2px solid var(--accent-gold);">
@@ -597,7 +600,7 @@ $currentUser = getCurrentUser();
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
+    <!-- Modal para Confirmar Eliminación -->
     <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content" style="background: linear-gradient(135deg, rgba(61, 39, 35, 0.98), rgba(22, 33, 62, 0.98)); border: 2px solid #ff6b6b;">
@@ -631,7 +634,7 @@ $currentUser = getCurrentUser();
         </div>
     </div>
 
-    <!-- Toast Container -->
+    <!-- Contenedor de Toasts -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -762,7 +765,6 @@ $currentUser = getCurrentUser();
         }
     </script>
 
-    <!-- Cart Preview Component - Must be direct child of body for fixed positioning -->
     <?php include 'components/cart_preview.php'; ?>
 </body>
 </html>

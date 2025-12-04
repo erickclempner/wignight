@@ -18,22 +18,22 @@ function getConnection() {
     return $conn;
 }
 
-// Start session if not already started
+// Empezar sesión
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Check if user is logged in
+// Checar si el usuario ya está logueado
 function isLoggedIn() {
     return isset($_SESSION['user_id']);
 }
 
-// Check if user is admin
+// Checar si el usuario es admin
 function isAdmin() {
     return isset($_SESSION['user_id']) && isset($_SESSION['id_rol']) && $_SESSION['id_rol'] == 2;
 }
 
-// Redirect if not logged in
+// Redireccionar si no está logueado
 function requireLogin() {
     if (!isLoggedIn()) {
         header("Location: login.php");
@@ -41,7 +41,7 @@ function requireLogin() {
     }
 }
 
-// Redirect if not admin
+// Redireccionar si no es admin
 function requireAdmin() {
     if (!isAdmin()) {
         header("Location: index.php");
@@ -49,7 +49,7 @@ function requireAdmin() {
     }
 }
 
-// Get current user data
+// Obtener información del usuario actual
 function getCurrentUser() {
     if (!isLoggedIn()) {
         return null;
@@ -70,15 +70,15 @@ function getCurrentUser() {
     return $user;
 }
 
-// Format price
+// Formato para los precios
 function formatPrice($price) {
     return '$' . number_format($price, 2);
 }
 
-// Get cart item count for current user or guest
+// conteo de artículos en el carrito
 function getCartCount() {
     if (!isLoggedIn()) {
-        // Return guest cart count
+        // el return del conteo
         return isset($_SESSION['guest_cart']) ? count($_SESSION['guest_cart']) : 0;
     }
     
@@ -97,7 +97,7 @@ function getCartCount() {
     return $row['count'];
 }
 
-// Merge guest cart into user cart after login
+// hacer el merge del carrito de invitado a una cuenta de usuario cuando inicie sesión o cree una cuenta
 function mergeGuestCartToUser($userId) {
     if (!isset($_SESSION['guest_cart']) || empty($_SESSION['guest_cart'])) {
         return;
@@ -106,14 +106,14 @@ function mergeGuestCartToUser($userId) {
     $conn = getConnection();
     
     foreach ($_SESSION['guest_cart'] as $item) {
-        // Check if item already exists in user cart
+        // checar si el artículo ya está en el carrito
         $stmt = $conn->prepare("SELECT ID_Carrito, Cantidad FROM Carrito_Compras WHERE ID_Usuario_FK = ? AND ID_Producto_FK = ?");
         $stmt->bind_param("ii", $userId, $item['id_producto']);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
-            // Update existing item
+            // actualizar el artículo
             $cart_item = $result->fetch_assoc();
             $nueva_cantidad = $cart_item['Cantidad'] + $item['cantidad'];
             $stmt->close();
@@ -133,7 +133,7 @@ function mergeGuestCartToUser($userId) {
     
     $conn->close();
     
-    // Clear guest cart
+    // limpiar el carrito de invitado
     $_SESSION['guest_cart'] = [];
 }
 ?>

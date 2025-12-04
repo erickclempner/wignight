@@ -3,7 +3,7 @@ require_once '../config/database.php';
 
 header('Content-Type: application/json');
 
-// Initialize guest cart in session if not exists
+// Inicializar sesión de carrito de invitado
 if (!isLoggedIn() && !isset($_SESSION['guest_cart'])) {
     $_SESSION['guest_cart'] = [];
 }
@@ -55,7 +55,7 @@ function addToCart() {
     $cantidad = intval($_POST['cantidad'] ?? 1);
     $is_logged_in = isLoggedIn();
     
-    // Handle guest cart
+    // manejar carrito de invitado
     if (!$is_logged_in) {
         addToGuestCart($id_producto, $cantidad);
         return;
@@ -71,7 +71,7 @@ function addToCart() {
     
     $conn = getConnection();
     
-    // Check if product exists and has enough stock
+    // Checar si el producto existe y tiene suficiente stock
     $stmt = $conn->prepare("SELECT Cantidad_Almacen, Nombre FROM Productos WHERE ID_Producto = ?");
     $stmt->bind_param("i", $id_producto);
     $stmt->execute();
@@ -88,14 +88,14 @@ function addToCart() {
     $producto = $result->fetch_assoc();
     $stmt->close();
     
-    // Check if item already exists in cart
+    // Checar si el artículo ya está en el carrito
     $stmt = $conn->prepare("SELECT ID_Carrito, Cantidad FROM Carrito_Compras WHERE ID_Usuario_FK = ? AND ID_Producto_FK = ?");
     $stmt->bind_param("ii", $id_usuario, $id_producto);
     $stmt->execute();
     $result = $stmt->get_result();
     
     if ($result->num_rows > 0) {
-        // Update existing cart item
+        // actualizar el artículo en el carrito
         $cart_item = $result->fetch_assoc();
         $nueva_cantidad = $cart_item['Cantidad'] + $cantidad;
         
@@ -119,7 +119,7 @@ function addToCart() {
             $response['message'] = 'Error al actualizar el carrito';
         }
     } else {
-        // Check stock availability
+        // Checar stock
         if ($cantidad > $producto['Cantidad_Almacen']) {
             $response['message'] = 'No hay suficiente stock disponible. Stock actual: ' . $producto['Cantidad_Almacen'];
             echo json_encode($response);
@@ -128,7 +128,7 @@ function addToCart() {
             exit();
         }
         
-        // Add new item to cart
+        // agregar artículo al carrito
         $stmt->close();
         $stmt = $conn->prepare("INSERT INTO Carrito_Compras (ID_Usuario_FK, ID_Producto_FK, Cantidad) VALUES (?, ?, ?)");
         $stmt->bind_param("iii", $id_usuario, $id_producto, $cantidad);
@@ -154,7 +154,7 @@ function updateCartItem() {
     $id_carrito = intval($_POST['id_carrito']);
     $cantidad = intval($_POST['cantidad']);
     
-    // Handle guest cart
+    // manejar carrito de invitado
     if (!isLoggedIn()) {
         updateGuestCartItem($id_carrito, $cantidad);
         return;
@@ -170,7 +170,7 @@ function updateCartItem() {
     
     $conn = getConnection();
     
-    // Verify cart item belongs to user and check stock
+    // Verificar que el artículo del carrito pertenece al usuario y checar stock
     $stmt = $conn->prepare("
         SELECT c.ID_Carrito, p.Cantidad_Almacen, p.Nombre 
         FROM Carrito_Compras c 
@@ -223,7 +223,6 @@ function removeFromCart() {
     
     $id_carrito = intval($_POST['id_carrito']);
     
-    // Handle guest cart
     if (!isLoggedIn()) {
         removeFromGuestCart($id_carrito);
         return;
@@ -253,7 +252,7 @@ function removeFromCart() {
 function clearCart() {
     global $response;
     
-    // Handle guest cart
+    // manejar carrito de invitado
     if (!isLoggedIn()) {
         $_SESSION['guest_cart'] = [];
         $response['success'] = true;
@@ -286,7 +285,6 @@ function clearCart() {
 function getCart() {
     global $response;
     
-    // Handle guest cart
     if (!isLoggedIn()) {
         getGuestCart();
         return;
@@ -342,7 +340,7 @@ function getCart() {
 function checkout() {
     global $response;
     
-    // Guests must login to checkout
+    // los invitados tienen que loguearse para comprar
     if (!isLoggedIn()) {
         $response['message'] = 'Debes iniciar sesión para completar la compra';
         $response['data'] = ['redirect' => 'login.php'];
@@ -353,11 +351,10 @@ function checkout() {
     $id_usuario = $_SESSION['user_id'];
     $conn = getConnection();
     
-    // Start transaction
+    // transacción
     $conn->begin_transaction();
     
     try {
-        // Get cart items
         $stmt = $conn->prepare("
             SELECT 
                 c.ID_Carrito,
@@ -383,7 +380,7 @@ function checkout() {
         $total_orden = 0;
         
         while ($row = $result->fetch_assoc()) {
-            // Check stock availability
+            // checar stock
             if ($row['Cantidad'] > $row['Cantidad_Almacen']) {
                 throw new Exception('Stock insuficiente para: ' . $row['Nombre'] . '. Disponible: ' . $row['Cantidad_Almacen']);
             }
@@ -394,7 +391,7 @@ function checkout() {
         }
         $stmt->close();
         
-        // Get user address
+        // direccion del usuario
         $stmt = $conn->prepare("SELECT Direccion_Postal FROM Usuarios WHERE ID_Usuario = ?");
         $stmt->bind_param("i", $id_usuario);
         $stmt->execute();
@@ -403,23 +400,23 @@ function checkout() {
         $direccion = $user['Direccion_Postal'] ?? 'Dirección no especificada';
         $stmt->close();
         
-        // Create order
+        // crear orden
         $stmt = $conn->prepare("INSERT INTO Ordenes (ID_Usuario_FK, Total_Orden, Estado_Orden, Direccion_Envio_Snapshot) VALUES (?, ?, 'Procesando', ?)");
         $stmt->bind_param("ids", $id_usuario, $total_orden, $direccion);
         $stmt->execute();
         $id_orden = $conn->insert_id;
         $stmt->close();
         
-        // Create order details and update inventory
+        // crear detalles de la orden y actualizar inventario
         foreach ($cart_items as $item) {
-            // Insert order detail
+            // Insertar detalle de la orden
             $subtotal = $item['Cantidad'] * $item['Precio'];
             $stmt = $conn->prepare("INSERT INTO Ordenes_Detalles (ID_Orden_FK, ID_Producto_FK, Cantidad, Precio_Unitario_Snapshot, Subtotal_Linea) VALUES (?, ?, ?, ?, ?)");
             $stmt->bind_param("iiidd", $id_orden, $item['ID_Producto_FK'], $item['Cantidad'], $item['Precio'], $subtotal);
             $stmt->execute();
             $stmt->close();
             
-            // Update inventory
+            // actualizar inventario
             $nueva_cantidad = $item['Cantidad_Almacen'] - $item['Cantidad'];
             $stmt = $conn->prepare("UPDATE Productos SET Cantidad_Almacen = ? WHERE ID_Producto = ?");
             $stmt->bind_param("ii", $nueva_cantidad, $item['ID_Producto_FK']);
@@ -427,13 +424,13 @@ function checkout() {
             $stmt->close();
         }
         
-        // Clear cart
+        // limpiar carrito
         $stmt = $conn->prepare("DELETE FROM Carrito_Compras WHERE ID_Usuario_FK = ?");
         $stmt->bind_param("i", $id_usuario);
         $stmt->execute();
         $stmt->close();
         
-        // Commit transaction
+        // hacer commit para mysql
         $conn->commit();
         
         $response['success'] = true;
@@ -463,13 +460,13 @@ function getCartCountConn($conn, $id_usuario) {
     return $row['count'];
 }
 
-// Guest cart functions
+// estas son funciones del carrito para invitados, osea, que no se han logueado
 function addToGuestCart($id_producto, $cantidad) {
     global $response;
     
     $conn = getConnection();
     
-    // Check if product exists and has enough stock
+    // checar si el producto existe y tiene suficiente stock
     $stmt = $conn->prepare("SELECT Cantidad_Almacen, Nombre, Precio, Descripcion, Fotos FROM Productos WHERE ID_Producto = ?");
     $stmt->bind_param("i", $id_producto);
     $stmt->execute();
@@ -487,7 +484,7 @@ function addToGuestCart($id_producto, $cantidad) {
     $stmt->close();
     $conn->close();
     
-    // Check if item already exists in guest cart
+    // checar si ya existe en el carrito de invitados
     $found = false;
     foreach ($_SESSION['guest_cart'] as &$item) {
         if ($item['id_producto'] == $id_producto) {
@@ -506,14 +503,14 @@ function addToGuestCart($id_producto, $cantidad) {
     }
     
     if (!$found) {
-        // Check stock availability
+        // checar stock
         if ($cantidad > $producto['Cantidad_Almacen']) {
             $response['message'] = 'No hay suficiente stock disponible. Stock actual: ' . $producto['Cantidad_Almacen'];
             echo json_encode($response);
             return;
         }
         
-        // Add new item to guest cart
+        // agregar artículo
         $_SESSION['guest_cart'][] = [
             'id_carrito' => 'guest_' . $id_producto, // Unique ID for guest items
             'id_producto' => $id_producto,
@@ -612,7 +609,6 @@ function getGuestCart() {
 function getCartPreview() {
     global $response;
     
-    // Handle guest cart
     if (!isLoggedIn()) {
         $items = [];
         $total = 0;
@@ -674,7 +670,7 @@ function getCartPreview() {
     
     $stmt->close();
     
-    // Get total and count
+    // obtener total y cantidad
     $stmt = $conn->prepare("
         SELECT 
             COUNT(*) as count,

@@ -5,7 +5,7 @@ requireLogin();
 $user = getCurrentUser();
 $conn = getConnection();
 
-// Get user's order history
+// obtener el historial de órdenes del usuario
 $stmt = $conn->prepare("
     SELECT 
         o.ID_Orden,
@@ -26,7 +26,7 @@ $stmt->execute();
 $orders = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Get full user data
+// todos los datos del usuario
 $stmt = $conn->prepare("SELECT * FROM Usuarios WHERE ID_Usuario = ?");
 $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
@@ -48,7 +48,7 @@ unset($_SESSION['register_success']);
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="index.php">
@@ -137,7 +137,6 @@ unset($_SESSION['register_success']);
         </div>
     </nav>
 
-    <!-- Profile Section -->
     <section class="py-5">
         <div class="container">
             <?php if ($success_message): ?>
@@ -210,7 +209,6 @@ unset($_SESSION['register_success']);
                     </div>
                 </div>
 
-                <!-- Order History -->
                 <div class="col-lg-8 mb-4">
                     <div class="card">
                         <div class="card-body">
@@ -315,7 +313,6 @@ unset($_SESSION['register_success']);
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="text-center">
         <div class="container">
             <div class="row">
@@ -355,13 +352,12 @@ unset($_SESSION['register_success']);
         </div>
     </footer>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/cart.js"></script>
 
-    <!-- Cart Preview Component - Must be direct child of body for fixed positioning -->
+    <!-- componente del preview del carrito -->
     <?php include 'components/cart_preview.php'; ?>
 </body>
 </html>

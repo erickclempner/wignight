@@ -1,7 +1,7 @@
 <?php
 require_once '../config/database.php';
 
-// Require admin access
+// requiere acceso de admin
 requireAdmin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -35,7 +35,7 @@ function addProduct() {
     $fabricante = trim($_POST['fabricante'] ?? '');
     $origen = trim($_POST['origen'] ?? '');
     
-    // Handle image upload
+    // manejar subir imagenes
     $foto = null;
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
@@ -91,7 +91,7 @@ function editProduct() {
     
     $conn = getConnection();
     
-    // Check if new image was uploaded
+    // checar si se subió la nueva imagen
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
         $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
         $max_size = 2 * 1024 * 1024; // 2MB
@@ -136,7 +136,7 @@ function deleteProduct() {
     
     $conn = getConnection();
     
-    // Check if product exists in cart or orders first
+    // Checar que exista el producto primero
     $stmt = $conn->prepare("SELECT COUNT(*) as count FROM Carrito_Compras WHERE ID_Producto_FK = ?");
     $stmt->bind_param("i", $id_producto);
     $stmt->execute();

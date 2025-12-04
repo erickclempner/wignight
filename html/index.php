@@ -1,7 +1,8 @@
 <?php
+// index - la pagina principal
 require_once 'config/database.php';
 
-// Get featured products (limit to 6)
+// productos destacados
 $conn = getConnection();
 $query = "SELECT * FROM Productos ORDER BY ID_Producto DESC LIMIT 6";
 $result = $conn->query($query);
@@ -26,7 +27,6 @@ $currentUser = getCurrentUser();
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container">
             <a class="navbar-brand" href="index.php">
@@ -88,7 +88,6 @@ $currentUser = getCurrentUser();
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-content">
             <h1 class="hero-title">
@@ -110,7 +109,7 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Featured Products Section -->
+    <!-- productos destacados -->
     <section id="featured" class="py-5">
         <div class="container">
             <h2 class="section-title">
@@ -195,7 +194,7 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Features Section -->
+    <!-- seccion de beneficios -->
     <section class="py-5" style="background: rgba(61, 39, 35, 0.3);">
         <div class="container">
             <h2 class="section-title">
@@ -236,7 +235,6 @@ $currentUser = getCurrentUser();
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="text-center">
         <div class="container">
             <div class="row">
@@ -244,7 +242,7 @@ $currentUser = getCurrentUser();
                     <h5 style="color: var(--moon-glow);">
                         <i class="fas fa-moon"></i> WigNight
                     </h5>
-                    <p>Tu mejor descanso comienza aquí</p>
+                    <p>Tu mejor descanso es con WigNight</p>
                 </div>
                 <div class="col-md-4 mb-3">
                     <h5 style="color: var(--moon-glow);">Enlaces Rápidos</h5>
@@ -276,7 +274,6 @@ $currentUser = getCurrentUser();
         </div>
     </footer>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -286,7 +283,7 @@ $currentUser = getCurrentUser();
             const btn = document.getElementById('btn-' + idProducto);
             const originalHtml = btn.innerHTML;
             
-            // Disable button and show loading
+            // desactivar el boton cuando carga
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agregando...';
 
@@ -302,25 +299,25 @@ $currentUser = getCurrentUser();
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Show success feedback
-                    btn.innerHTML = '<i class="fas fa-check"></i> ¡Agregado!';
+                    // mostrar el mensaje de exito
+                    btn.innerHTML = '<i class="fas fa-check"></i> Agregado';
                     btn.classList.remove('btn-primary');
                     btn.classList.add('btn-success');
                     
-                    // Update cart badge
+                    // actualizar contador
                     updateCartBadge(data.data.cart_count);
                     
-                    // Reload cart preview
+                    // volver a cargar el preview del carrito
                     reloadCartPreview();
                     
-                    // Show enhanced notification
+                    // notificacion de exito como pop up
                     showNotification('success', 'Producto agregado correctamente', {
                         nombre: nombreProducto,
                         precio: data.data.precio || 0,
                         foto: data.data.foto || null
                     });
                     
-                    // Reset button after 2 seconds
+                    // resetear el boton
                     setTimeout(() => {
                         btn.innerHTML = originalHtml;
                         btn.classList.remove('btn-success');
@@ -341,10 +338,8 @@ $currentUser = getCurrentUser();
             });
         }
 
-        // Functions updateCartBadge, showNotification, etc. are in cart.js
     </script>
 
-    <!-- Cart Preview Component - Must be direct child of body for fixed positioning -->
     <?php include 'components/cart_preview.php'; ?>
 </body>
 </html>
