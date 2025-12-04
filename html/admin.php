@@ -1,13 +1,13 @@
 <?php
 require_once 'config/database.php';
 
-// Require admin access
+// Requiere acceso de admin
 requireAdmin();
 
 $error = '';
 $success = '';
 
-// Get all products
+// Obtener todos los productos
 $conn = getConnection();
 $query = "SELECT * FROM Productos ORDER BY ID_Producto DESC";
 $result = $conn->query($query);
@@ -18,12 +18,14 @@ if ($result) {
     }
 }
 
-// Get statistics
+// Panel de estadisticas
 $stats = [
     'total_productos' => 0,
     'total_usuarios' => 0,
     'productos_stock' => 0,
-    'productos_sin_stock' => 0
+    'productos_sin_stock' => 0,
+    'total_ordenes' => 0,
+    'ingresos_totales' => 0
 ];
 
 $result = $conn->query("SELECT COUNT(*) as total FROM Productos");
@@ -46,6 +48,33 @@ if ($result) {
     $stats['productos_sin_stock'] = $result->fetch_assoc()['total'];
 }
 
+// Estadísticas de órdenes
+$result = $conn->query("SELECT COUNT(*) as total FROM Ordenes");
+if ($result) {
+    $stats['total_ordenes'] = $result->fetch_assoc()['total'];
+}
+
+$result = $conn->query("SELECT COALESCE(SUM(Total_Orden), 0) as total FROM Ordenes");
+if ($result) {
+    $stats['ingresos_totales'] = $result->fetch_assoc()['total'];
+}
+
+// Obtener historial de órdenes con detalles
+$queryOrdenes = "SELECT o.ID_Orden, o.Fecha_Orden, o.Total_Orden, o.Estado_Orden, 
+                        o.Direccion_Envio_Snapshot, u.Nombre_Usuario, u.Correo_Electronico,
+                        (SELECT COUNT(*) FROM Ordenes_Detalles WHERE ID_Orden_FK = o.ID_Orden) as total_items
+                 FROM Ordenes o 
+                 JOIN Usuarios u ON o.ID_Usuario_FK = u.ID_Usuario 
+                 ORDER BY o.Fecha_Orden DESC 
+                 LIMIT 50";
+$resultOrdenes = $conn->query($queryOrdenes);
+$ordenes = [];
+if ($resultOrdenes) {
+    while ($row = $resultOrdenes->fetch_assoc()) {
+        $ordenes[] = $row;
+    }
+}
+
 $conn->close();
 
 $currentUser = getCurrentUser();
@@ -59,9 +88,52 @@ $currentUser = getCurrentUser();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Admin page specific overrides */
+        .table-responsive {
+            background: rgba(44, 24, 16, 0.9);
+            border-radius: 15px;
+            padding: 0;
+            border: 2px solid var(--wood-accent);
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+            background: transparent !important;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #2c1810, #4a2c1a) !important;
+            color: #f4e4c1 !important;
+            border-bottom: 2px solid #b87333 !important;
+        }
+        
+        .table tbody {
+            background: rgba(44, 24, 16, 0.95) !important;
+        }
+        
+        .table tbody tr {
+            background: transparent !important;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(212, 175, 55, 0.15) !important;
+        }
+        
+        .table tbody td {
+            color: #e8e8e8 !important;
+            background: transparent !important;
+            border-color: rgba(139, 111, 71, 0.3) !important;
+        }
+        
+        .table-hover > tbody > tr:hover > td {
+            background: transparent !important;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- Navegacion -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="index.php">
@@ -149,6 +221,18 @@ $currentUser = getCurrentUser();
                     <div class="stat-number"><?php echo $stats['total_usuarios']; ?></div>
                     <div class="stat-label">
                         <i class="fas fa-users"></i> Usuarios
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $stats['total_ordenes']; ?></div>
+                    <div class="stat-label">
+                        <i class="fas fa-shopping-bag"></i> Órdenes
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo formatPrice($stats['ingresos_totales']); ?></div>
+                    <div class="stat-label">
+                        <i class="fas fa-dollar-sign"></i> Ingresos
                     </div>
                 </div>
             </div>
@@ -252,6 +336,118 @@ $currentUser = getCurrentUser();
             </div>
         </div>
     </section>
+
+    <!-- Orders History Section -->
+    <section class="py-4">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 style="color: var(--moon-glow);">
+                    <i class="fas fa-history"></i> Historial de Compras
+                </h2>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID Orden</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Email</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Dirección</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($ordenes)): ?>
+                            <tr>
+                                <td colspan="9" class="text-center py-4">
+                                    <i class="fas fa-inbox fa-3x mb-3" style="color: var(--wood-lighter); display: block;"></i>
+                                    <p style="color: var(--accent-cream);">No hay órdenes registradas</p>
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($ordenes as $orden): ?>
+                                <tr>
+                                    <td style="color: var(--moon-glow); font-weight: bold;">#<?php echo $orden['ID_Orden']; ?></td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($orden['Fecha_Orden'])); ?></td>
+                                    <td><?php echo htmlspecialchars($orden['Nombre_Usuario']); ?></td>
+                                    <td style="color: var(--accent-cream);"><?php echo htmlspecialchars($orden['Correo_Electronico']); ?></td>
+                                    <td>
+                                        <span class="badge bg-info"><?php echo $orden['total_items']; ?> items</span>
+                                    </td>
+                                    <td style="color: var(--accent-gold); font-weight: bold;">
+                                        <?php echo formatPrice($orden['Total_Orden']); ?>
+                                    </td>
+                                    <td>
+                                        <?php 
+                                        $estadoClass = 'bg-secondary';
+                                        switch(strtolower($orden['Estado_Orden'])) {
+                                            case 'procesando':
+                                                $estadoClass = 'bg-warning text-dark';
+                                                break;
+                                            case 'enviado':
+                                                $estadoClass = 'bg-info';
+                                                break;
+                                            case 'entregado':
+                                                $estadoClass = 'bg-success';
+                                                break;
+                                            case 'cancelado':
+                                                $estadoClass = 'bg-danger';
+                                                break;
+                                        }
+                                        ?>
+                                        <span class="badge <?php echo $estadoClass; ?>"><?php echo htmlspecialchars($orden['Estado_Orden']); ?></span>
+                                    </td>
+                                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
+                                        title="<?php echo htmlspecialchars($orden['Direccion_Envio_Snapshot']); ?>">
+                                        <?php echo htmlspecialchars(substr($orden['Direccion_Envio_Snapshot'], 0, 30)) . (strlen($orden['Direccion_Envio_Snapshot']) > 30 ? '...' : ''); ?>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" 
+                                                onclick="viewOrderDetails(<?php echo $orden['ID_Orden']; ?>)"
+                                                title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="background: linear-gradient(135deg, rgba(61, 39, 35, 0.98), rgba(22, 33, 62, 0.98)); border: 2px solid var(--accent-gold);">
+                <div class="modal-header" style="border-bottom: 2px solid var(--wood-lighter);">
+                    <h5 class="modal-title" style="color: var(--moon-glow);">
+                        <i class="fas fa-receipt"></i> Detalles de la Orden #<span id="modalOrderId"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="orderDetailsContent">
+                        <div class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--accent-gold);"></i>
+                            <p style="color: var(--accent-cream); margin-top: 1rem;">Cargando detalles...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 2px solid var(--wood-lighter);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Add Product Modal -->
     <div class="modal fade" id="addProductModal" tabindex="-1">
@@ -460,6 +656,109 @@ $currentUser = getCurrentUser();
             
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
             deleteModal.show();
+        }
+
+        function viewOrderDetails(orderId) {
+            document.getElementById('modalOrderId').textContent = orderId;
+            document.getElementById('orderDetailsContent').innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--accent-gold);"></i>
+                    <p style="color: var(--accent-cream); margin-top: 1rem;">Cargando detalles...</p>
+                </div>
+            `;
+            
+            const orderModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            orderModal.show();
+            
+            // Fetch order details
+            fetch(`api/ordenes.php?action=details&id=${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let html = `
+                            <div class="order-info mb-4" style="background: rgba(107, 68, 35, 0.3); padding: 1rem; border-radius: 10px; border: 1px solid var(--wood-accent);">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p style="color: var(--accent-cream); margin-bottom: 0.5rem;">
+                                            <i class="fas fa-user"></i> <strong>Cliente:</strong> ${data.orden.Nombre_Usuario}
+                                        </p>
+                                        <p style="color: var(--accent-cream); margin-bottom: 0.5rem;">
+                                            <i class="fas fa-envelope"></i> <strong>Email:</strong> ${data.orden.Correo_Electronico}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p style="color: var(--accent-cream); margin-bottom: 0.5rem;">
+                                            <i class="fas fa-calendar"></i> <strong>Fecha:</strong> ${new Date(data.orden.Fecha_Orden).toLocaleString('es-MX')}
+                                        </p>
+                                        <p style="color: var(--accent-cream); margin-bottom: 0.5rem;">
+                                            <i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong> ${data.orden.Direccion_Envio_Snapshot}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6 style="color: var(--moon-glow); margin-bottom: 1rem;">
+                                <i class="fas fa-list"></i> Productos de la Orden
+                            </h6>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Precio Unit.</th>
+                                            <th>Cantidad</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+                        
+                        data.detalles.forEach(item => {
+                            html += `
+                                <tr>
+                                    <td style="color: var(--accent-cream);">${item.Nombre_Producto}</td>
+                                    <td style="color: var(--accent-gold);">$${parseFloat(item.Precio_Unitario_Snapshot).toFixed(2)}</td>
+                                    <td>${item.Cantidad}</td>
+                                    <td style="color: var(--accent-gold); font-weight: bold;">$${parseFloat(item.Subtotal_Linea).toFixed(2)}</td>
+                                </tr>
+                            `;
+                        });
+                        
+                        html += `
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="border-top: 2px solid var(--wood-accent);">
+                                            <td colspan="3" style="text-align: right; color: var(--moon-glow); font-weight: bold;">
+                                                <i class="fas fa-calculator"></i> Total:
+                                            </td>
+                                            <td style="color: var(--accent-gold); font-weight: bold; font-size: 1.2rem;">
+                                                $${parseFloat(data.orden.Total_Orden).toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        `;
+                        
+                        document.getElementById('orderDetailsContent').innerHTML = html;
+                    } else {
+                        document.getElementById('orderDetailsContent').innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="fas fa-exclamation-circle fa-2x" style="color: #ff6b6b;"></i>
+                                <p style="color: #ff6b6b; margin-top: 1rem;">Error al cargar los detalles: ${data.error}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('orderDetailsContent').innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-exclamation-circle fa-2x" style="color: #ff6b6b;"></i>
+                            <p style="color: #ff6b6b; margin-top: 1rem;">Error de conexión</p>
+                        </div>
+                    `;
+                });
         }
     </script>
 

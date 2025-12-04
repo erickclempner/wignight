@@ -1,11 +1,11 @@
-// Cart functionality - shared across pages
+// Funcionalidad del carrito
 
 function formatPrice(price) {
     return '$' + parseFloat(price).toFixed(2);
 }
 
 function updateCartBadge(count) {
-    // Update all cart badges in navbar
+    // Actualizar todas las badges del carrito en el navbar
     const badges = document.querySelectorAll('.navbar .cart-badge');
     badges.forEach(badge => {
         badge.textContent = count;
@@ -58,14 +58,14 @@ function showNotification(type, message, productData = null) {
     }, 4000);
 }
 
-// Cart Preview Management
+
 let cartPreviewLoaded = false;
 let hidePreviewTimeout = null;
 let isOverCart = false;
 let isOverPreview = false;
 
 function initCartPreview() {
-    // Find cart links - more flexible selector
+    // Encontrar links del carrito
     const cartLinks = document.querySelectorAll('a[href="carrito.php"], a.nav-link[href*="carrito"]');
     const previewOverlay = document.getElementById('cartPreviewOverlay');
     
@@ -75,88 +75,78 @@ function initCartPreview() {
     });
     
     if (!previewOverlay) {
-        console.error('Cart preview overlay not found!');
+        console.error('Overlay de vista del carrito no encontrado');
         return;
     }
     
     if (cartLinks.length === 0) {
-        console.error('No cart links found!');
+        console.error('No se encontraron links al carrito');
         return;
     }
     
     cartLinks.forEach((cartLink, index) => {
-        console.log(`Setting up hover for cart link ${index + 1}`);
-        
-        // Show preview when hovering over cart link
+        // Mostrar vista previa al pasar el mouse sobre el link del carrito
         cartLink.addEventListener('mouseenter', function(e) {
-            console.log('Mouse entered cart link');
             isOverCart = true;
             clearTimeout(hidePreviewTimeout);
             showCartPreview();
         });
         
-        // Hide preview when leaving cart link (with delay)
+        // Ocultar vista previa al salir del link del carrito (con un delay)
         cartLink.addEventListener('mouseleave', function(e) {
-            console.log('Mouse left cart link');
             isOverCart = false;
             hidePreviewTimeout = setTimeout(() => {
                 if (!isOverPreview) {
                     hideCartPreview();
                 }
-            }, 300);
+            }, 1000);
         });
     });
     
-    // Keep preview open when hovering over it
-    previewOverlay.addEventListener('mouseenter', function() {
-        console.log('Mouse entered preview overlay');
-        isOverPreview = true;
-        clearTimeout(hidePreviewTimeout);
-    });
+    // Mantener la vista previa visible al tener el mouse adentro
+    const previewContainer = previewOverlay.querySelector('.cart-preview-container');
+    if (previewContainer) {
+        previewContainer.addEventListener('mouseenter', function() {
+            isOverPreview = true;
+            clearTimeout(hidePreviewTimeout);
+        });
+        
+        // Quitar la vista previa
+        previewContainer.addEventListener('mouseleave', function() {
+            isOverPreview = false;
+            hidePreviewTimeout = setTimeout(() => {
+                if (!isOverCart) {
+                    hideCartPreview();
+                }
+            }, 300);
+        });
+    }
     
-    // Hide preview when leaving overlay
-    previewOverlay.addEventListener('mouseleave', function() {
-        console.log('Mouse left preview overlay');
-        isOverPreview = false;
-        hidePreviewTimeout = setTimeout(() => {
-            if (!isOverCart) {
-                hideCartPreview();
-            }
-        }, 300);
-    });
-    
-    // Hide preview when clicking on overlay background (not on the container)
+    // Quitar el preview cuando hacer click en el fondo del overlay (no en el contenedor)
     previewOverlay.addEventListener('click', function(e) {
         if (e.target === previewOverlay) {
             hideCartPreview();
         }
     });
-    
-    console.log('Cart preview initialized successfully');
 }
 
 function showCartPreview() {
-    console.log('showCartPreview called');
     const previewOverlay = document.getElementById('cartPreviewOverlay');
     if (previewOverlay) {
-        console.log('Adding active class to overlay');
         previewOverlay.classList.add('active');
         
         if (!cartPreviewLoaded) {
-            console.log('Loading cart preview data');
             loadCartPreview();
             cartPreviewLoaded = true;
         }
     } else {
-        console.error('Preview overlay not found in showCartPreview');
+        console.error('Overlay del preview no encontrado en showCartPreview');
     }
 }
-
+// Ocultar el preview del carrito
 function hideCartPreview() {
-    console.log('hideCartPreview called');
     const previewOverlay = document.getElementById('cartPreviewOverlay');
     if (previewOverlay) {
-        console.log('Removing active class from overlay');
         previewOverlay.classList.remove('active');
     }
 }
@@ -176,7 +166,7 @@ function loadCartPreview() {
         }
     })
     .catch(error => {
-        console.error('Error loading cart preview:', error);
+        console.error('Error cargando preview del carrito:', error);
         const body = document.getElementById('cartDropdownBody');
         if (body) {
             body.innerHTML = `
@@ -198,7 +188,7 @@ function renderCartPreview(cartData) {
     
     if (!body) return;
     
-    // Update count in header
+    // Actualizar el contandor en el header
     if (countElement) {
         countElement.textContent = cartData.count;
     }
@@ -214,8 +204,8 @@ function renderCartPreview(cartData) {
         return;
     }
     
-    // Show only first 3 items
-    const displayItems = cartData.items.slice(0, 3);
+    // Solo mostrar los primeros 10 artículos en el preview, son suficientes la mayoria de los casos
+    const displayItems = cartData.items.slice(0, 10);
     let itemsHTML = '';
     
     displayItems.forEach(item => {
@@ -243,17 +233,17 @@ function renderCartPreview(cartData) {
     
     body.innerHTML = itemsHTML;
     
-    // Update total
+    // Actualizar total
     if (totalElement) {
         totalElement.textContent = formatPrice(cartData.total);
     }
     
-    // Update "Ver Bolsa" button text
+    // Actualizar el boton "Ver Bolsa"
     if (verBolsaText) {
         verBolsaText.textContent = `Ver Bolsa (${cartData.count})`;
     }
     
-    // Show footer
+    // Mostrar footer
     if (footer) {
         footer.style.display = 'block';
     }
@@ -265,7 +255,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Remove item from cart preview
+// Eliminar artículo del preview del carrito
 function removeFromCartPreview(idCarrito) {
     if (!confirm('¿Deseas eliminar este producto del carrito?')) {
         return;
@@ -294,13 +284,13 @@ function removeFromCartPreview(idCarrito) {
     });
 }
 
-// Reload cart preview after adding item
+// Recargar preview del carrito después de agregar un artículo
 function reloadCartPreview() {
     cartPreviewLoaded = false;
     loadCartPreview();
 }
 
-// Initialize on page load
+// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
     initCartPreview();
 });
